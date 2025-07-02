@@ -1,7 +1,7 @@
 from typing import List, Dict, Any
 import os
 import traceback
-from MCP.tool import tool_registry
+from task_tools.registry import tool_registry
 from agent.object_memory_manager import ObjectMemoryManager
 
 object_store = ObjectMemoryManager()  # 可改为外部注入

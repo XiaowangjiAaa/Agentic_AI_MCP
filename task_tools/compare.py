@@ -1,16 +1,9 @@
 import os
 import pandas as pd
 import numpy as np
-#from mcp.server.fastmcp import tool
-from MCP.tool import tool
+from task_tools.registry import tool
 
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
-
-# 可替换为真实装饰器
-def tool(name=None):
-    def decorator(fn):
-        return fn
-    return decorator
 
 
 @tool(name="compare_results_csv")

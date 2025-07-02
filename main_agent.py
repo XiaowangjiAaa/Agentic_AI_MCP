@@ -3,7 +3,7 @@ import json
 from openai import OpenAI
 from dotenv import load_dotenv
 from agent.executor import execute_plan
-from tools.path_utils import get_test_image_paths, get_test_image_by_index
+from utils.path_utils import get_test_image_paths, get_test_image_by_index
 from agent.visualize_tools import visualize_crack_result
 from agent.gpt_intent_parser import generate_composite_plan
 from agent.object_memory_manager import ObjectMemoryManager

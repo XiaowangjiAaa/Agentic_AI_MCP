@@ -1,5 +1,5 @@
 from typing import List, Dict
-from tools.path_utils import (
+from utils.path_utils import (
     get_test_image_by_index,
     get_test_image_paths,
     generate_segment_plan_from_paths,

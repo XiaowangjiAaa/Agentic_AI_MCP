@@ -2,16 +2,16 @@ import os
 import cv2
 import numpy as np
 import traceback
-from MCP.tool import tool
+from task_tools.registry import tool
 
-from Crack_quantification_tools.binarize import binarize
-from Crack_quantification_tools.area import compute_crack_area_px
-from Crack_quantification_tools.length import compute_crack_length_px
-from Crack_quantification_tools.width_max import compute_max_width_px
-from Crack_quantification_tools.width_avg import compute_average_width_px
-from Crack_quantification_tools.skeleton import extract_skeleton_and_normals
-from tools.visualize import visualize_max_width, save_visual
-from tools.io_utils import append_to_csv
+from crack_metrics.binarize import binarize
+from crack_metrics.area import compute_crack_area_px
+from crack_metrics.length import compute_crack_length_px
+from crack_metrics.width_max import compute_max_width_px
+from crack_metrics.width_avg import compute_average_width_px
+from crack_metrics.skeleton import extract_skeleton_and_normals
+from utils.visualize import visualize_max_width, save_visual
+from utils.io_utils import append_to_csv
 
 
 @tool(name="quantify_crack_geometry")
