@@ -3,9 +3,9 @@ from pathlib import Path
 import shutil
 import matplotlib.pyplot as plt
 import cv2
-from tools.visualize_image_tools import visualize_result
+from utils.visualize_image_tools import visualize_result
 from agent.memory import MemoryController
-from MCP.quantify import quantify_crack_geometry
+from task_tools.quantify import quantify_crack_geometry
 
 
 def visualize_crack_result(
@@ -22,7 +22,7 @@ def visualize_crack_result(
     import shutil
     import matplotlib.pyplot as plt
     import cv2
-    from tools.visualize_image_tools import visualize_result
+    from utils.visualize_image_tools import visualize_result
 
     image_path = Path(f"data/Test_images/{subject_name}.jpg").resolve()
     mask_path_raw = memory.get_mask_path(subject_name)

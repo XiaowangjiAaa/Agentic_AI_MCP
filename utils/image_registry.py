@@ -1,5 +1,5 @@
 from pathlib import Path
-from tools.path_utils import get_test_image_paths
+from utils.path_utils import get_test_image_paths
 
 # === 图像索引与文件名映射工具 ===
 

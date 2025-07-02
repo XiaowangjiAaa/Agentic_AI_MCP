@@ -1,8 +1,8 @@
 import numpy as np
 import os
 import cv2
-from Crack_quantification_tools.binarize import binarize
-from Crack_quantification_tools.skeleton import extract_skeleton_and_normals
+from crack_metrics.binarize import binarize
+from crack_metrics.skeleton import extract_skeleton_and_normals
 from scipy.spatial import cKDTree
 
 def visualize_max_width(image: np.ndarray) -> tuple[np.ndarray, float]:

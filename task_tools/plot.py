@@ -1,14 +1,7 @@
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
-#from mcp.server.fastmcp import tool
-from MCP.tool import tool
-
-# 可替换为真实装饰器
-def tool(name=None):
-    def decorator(fn):
-        return fn
-    return decorator
+from task_tools.registry import tool
 
 
 @tool(name="plot_comparison_graphs")

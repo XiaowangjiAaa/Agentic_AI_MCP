@@ -5,10 +5,10 @@ import cv2
 import traceback
 from PIL import Image as PILImage
 from torchvision import transforms
-from MCP.tool import tool
+from task_tools.registry import tool
 
-from model.unet import UNet
-from tools.preprocess import resolve_output_path
+from models.unet import UNet
+from utils.preprocess import resolve_output_path
 
 # 初始化模型（只加载一次）
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
