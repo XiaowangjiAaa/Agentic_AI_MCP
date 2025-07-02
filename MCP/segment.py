@@ -1,6 +1,3 @@
-# 更新后的 MCP/segment.py，融合你旧脚本中的模型推理和图像处理逻辑
-
-
 import os
 import torch
 import numpy as np
@@ -59,7 +56,6 @@ def segment_crack_image(image_path: str, checkpoint_path: str = "checkpoints/une
         output_path = resolve_output_path(image_path, suffix="mask", output_dir="outputs/masks")
         cv2.imwrite(output_path, binary_mask * 255)
 
-        print("[DEBUG] 掩膜保存成功:", output_path)
         if not os.path.exists(output_path):
             raise RuntimeError(f"掩膜保存失败，未找到文件: {output_path}")
 
@@ -81,4 +77,3 @@ def segment_crack_image(image_path: str, checkpoint_path: str = "checkpoints/une
             "outputs": None,
             "error": str(e)
         }
-

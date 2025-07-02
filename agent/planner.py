@@ -53,15 +53,20 @@ def generate_plan(user_input: str, memory: Dict = None) -> List[Dict]:
                     mask_paths.append(all_masks[idx])
 
         for path in mask_paths:
-            plan.append({
+            step = {
                 "tool": "quantify_crack_geometry",
                 "args": {
                     "mask_path": path,
                     "pixel_size_mm": pixel_size,
-                    "metrics": ["length", "area", "max_width", "avg_width"],
-                    "visuals": ["skeleton", "max_width"]
+                    "metrics": ["length", "area", "max_width", "avg_width"]
                 }
-            })
+            }
+
+            # ✅ 仅在用户明确请求时才添加可视化
+            if any(word in user_input.lower() for word in ["skeleton", "width map", "max width image", "visualize"]):
+                step["args"]["visuals"] = ["skeleton", "max_width"]
+
+            plan.append(step)
 
     # === COMPARE ===
     if "compare" in user_input or "ground truth" in user_input or "gt" in user_input:

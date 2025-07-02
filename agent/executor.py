@@ -22,9 +22,15 @@ def execute_plan(plan: List[Dict[str, Any]], memory=None) -> List[Dict[str, Any]
     for step in plan:
         tool_name = step.get("tool")
         args = step.get("args", {})
+        subject = step.get("subject", "")  # ✅ 提前获取 subject
         tool_fn = tool_registry.get(tool_name)
 
-        print(f"[DEBUG] 调用工具 {tool_name} -> {tool_fn}")
+        # ✅ Patch: 移除空的 visuals 参数（兜底）
+        if tool_name == "quantify_crack_geometry":
+            visuals = args.get("visuals", None)
+            if visuals is not None and len(visuals) == 0:
+                del args["visuals"]
+
         if not callable(tool_fn):
             results.append({
                 "tool": tool_name,
@@ -33,31 +39,15 @@ def execute_plan(plan: List[Dict[str, Any]], memory=None) -> List[Dict[str, Any]
                 "outputs": None,
                 "visualizations": None,
                 "error": "Tool not found in registry",
-                "args": args
+                "args": args,
+                "subject": subject  # ✅ 加入 subject
             })
             continue
 
         try:
             result = tool_fn(**args)
-            print(f"[DEBUG] 工具 {tool_name} 返回结果:", result)
 
-            # 自动写入 memory
-            if memory and result.get("status") == "success":
-                outputs = result.get("outputs", {})
-                if tool_name == "segment_crack_image":
-                    image_path = args.get("image_path", "")
-                    subject = os.path.splitext(os.path.basename(image_path))[0]
-                    if "mask_path" in outputs:
-                        memory.save_mask_path(subject, outputs["mask_path"])
-
-                elif tool_name == "quantify_crack_geometry":
-                    mask_path = args.get("mask_path", "")
-                    pixel_size = args.get("pixel_size_mm", 0.5)
-                    subject = step.get("subject") or os.path.splitext(os.path.basename(mask_path))[0]
-                    if outputs:
-                        memory.save_metrics(subject, pixel_size, outputs)
-
-            # 更新 object memory（原逻辑保留）
+            # ✅ 更新 object memory（原逻辑保留）
             if tool_name == "segment_crack_image" and result.get("status") == "success":
                 image_path = args.get("image_path", "")
                 object_id = object_store.find_id_by_image_path(image_path)
@@ -82,7 +72,8 @@ def execute_plan(plan: List[Dict[str, Any]], memory=None) -> List[Dict[str, Any]
                 "outputs": result.get("outputs", {}),
                 "visualizations": result.get("visualizations", None),
                 "error": result.get("error", None),
-                "args": args
+                "args": args,
+                "subject": subject  # ✅ 加入 subject 字段（确保 memory 使用）
             })
 
         except Exception as e:
@@ -95,7 +86,8 @@ def execute_plan(plan: List[Dict[str, Any]], memory=None) -> List[Dict[str, Any]
                 "outputs": None,
                 "visualizations": None,
                 "error": traceback.format_exc(),
-                "args": args
+                "args": args,
+                "subject": subject  # ✅ 即使失败也记录 subject
             })
 
     return results

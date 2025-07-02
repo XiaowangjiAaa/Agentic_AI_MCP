@@ -44,6 +44,13 @@ def quantify_crack_geometry(
             "Avg Width (mm)": lambda: round(compute_average_width_px(mask) * pixel_size_mm, 2),
         }
 
+        metric_alias_map = {
+            "Length (mm)": "length",
+            "Area (mm^2)": "area",
+            "Max Width (mm)": "max_width",
+            "Avg Width (mm)": "avg_width"
+        }
+
         if not metrics:
             selected_metrics = list(all_metrics.keys())
         else:
@@ -54,12 +61,16 @@ def quantify_crack_geometry(
                         selected_metrics.append(k)
 
         print(f"\U0001F4D0 最终启用指标: {selected_metrics}")
-        results = {name: all_metrics[name]() for name in selected_metrics}
 
-        # ✅ 写入 CSV
+        results = {
+            metric_alias_map[name]: all_metrics[name]() for name in selected_metrics
+        }
+
+        # ✅ 写入 CSV（保留原始带单位的列名）
+        results_for_csv = {name: all_metrics[name]() for name in selected_metrics}
         image_name = os.path.splitext(os.path.basename(mask_path))[0]
         os.makedirs("outputs/csv", exist_ok=True)
-        append_to_csv("outputs/csv/predicted_metrics.csv", image_name, results)
+        append_to_csv("outputs/csv/predicted_metrics.csv", image_name, results_for_csv)
 
         # ✅ 可视化结果
         vis_results = {}
@@ -117,4 +128,4 @@ def quantify_crack_geometry(
             "outputs": None,
             "visualizations": None,
             "error": str(e)
-    }
+        }

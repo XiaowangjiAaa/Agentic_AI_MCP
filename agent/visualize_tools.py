@@ -1,7 +1,11 @@
 import os
 from pathlib import Path
+import shutil
+import matplotlib.pyplot as plt
+import cv2
 from tools.visualize_image_tools import visualize_result
 from agent.memory import MemoryController
+from MCP.quantify import quantify_crack_geometry
 
 
 def visualize_crack_result(
@@ -9,41 +13,83 @@ def visualize_crack_result(
     memory: MemoryController,
     visual_types: list = ["original", "mask"],
     show: bool = True,
-    save_path: str = None
-):
+    save_dir: str = "outputs/visuals"
+) -> dict:
     """
-    可视化原图和分割掩膜图。
-
-    参数：
-        subject_name: 图像名（不含扩展名）
-        memory: MemoryController 实例
-        visual_types: ["original", "mask"]
-        show: 是否显示（默认 True）
-        save_path: 保存路径（可选）
+    可视化裂缝图像及其相关图层，若 memory 未命中则自动 fallback 调用 quantify 工具生成。
     """
+    from pathlib import Path
+    import shutil
+    import matplotlib.pyplot as plt
+    import cv2
+    from tools.visualize_image_tools import visualize_result
 
     image_path = Path(f"data/Test_images/{subject_name}.jpg").resolve()
     mask_path_raw = memory.get_mask_path(subject_name)
     mask_path = Path(mask_path_raw).resolve() if mask_path_raw else None
 
-    img_exists = image_path.exists()
-    mask_exists = mask_path and mask_path.exists()
+    vis_paths = {}
+    os.makedirs(save_dir, exist_ok=True)
 
-    print(f"[DEBUG] 原图路径: {image_path} | 存在: {img_exists}")
-    print(f"[DEBUG] 掩膜路径: {mask_path} | 存在: {mask_exists}")
+    # 原图
+    if "original" in visual_types and image_path.exists():
+        save_path = os.path.join(save_dir, f"{subject_name}_original.png")
+        shutil.copy(str(image_path), save_path)
+        vis_paths["original"] = save_path
 
-    show_img = str(image_path) if "original" in visual_types and img_exists else None
-    show_mask = str(mask_path) if "mask" in visual_types and mask_exists else None
+    # 掩膜图
+    if "mask" in visual_types and mask_path and mask_path.exists():
+        save_path = os.path.join(save_dir, f"{subject_name}_mask.png")
+        shutil.copy(str(mask_path), save_path)
+        vis_paths["mask"] = save_path
 
-    if not any([show_img, show_mask]):
-        print("⚠️ 没有可视化内容可用")
-        return
+    # ✅ skeleton / max_width fallback 自动生成
+    fallback_visuals = []
+    for vt in visual_types:
+        if vt in {"skeleton", "max_width", "normals"}:
+            cached = memory.get_visualization_path(subject_name, vt)
+            if cached and os.path.exists(cached):
+                vis_paths[vt] = cached
+            else:
+                fallback_visuals.append(vt)
 
-    visualize_result(
-        image_path=show_img,
-        mask_path=show_mask,
-        overlay=False,
-        max_width_path=None,
-        save_path=save_path if not show else None,
-        title=f"原图与分割图 - {subject_name}"
-    )
+    if fallback_visuals:
+        # 获取必要参数
+        mask_path_str = str(mask_path) if mask_path else None
+        pixel_size = memory.get_pixel_size(subject_name) or 0.5  # fallback 默认像素尺寸
+
+        if mask_path_str and os.path.exists(mask_path_str):
+            print(f"[fallback] 自动调用 quantify_crack_geometry 生成视觉图: {fallback_visuals}")
+            result = quantify_crack_geometry(
+                mask_path=mask_path_str,
+                pixel_size_mm=pixel_size,
+                metrics=[],  # 不生成指标
+                visuals=fallback_visuals
+            )
+            if result.get("status") == "success":
+                for k, v in result.get("visualizations", {}).items():
+                    vis_paths[k] = v
+                    memory.update_visualization_path(subject_name, k, v)
+        else:
+            print(f"[❌ fallback] 无掩膜路径，无法生成视觉图")
+
+    # 可视化显示
+    if show:
+        if "original" in vis_paths and "mask" in vis_paths:
+            visualize_result(
+                image_path=vis_paths["original"],
+                mask_path=vis_paths["mask"],
+                overlay=False,
+                max_width_path=None,
+                save_path=None,
+                title=f"原图与分割图 - {subject_name}"
+            )
+        elif "mask" in vis_paths:
+            mask = cv2.imread(vis_paths["mask"], cv2.IMREAD_GRAYSCALE)
+            if mask is not None:
+                plt.imshow(mask, cmap='gray')
+                plt.title(f"掩膜图 - {subject_name}")
+                plt.axis("off")
+                plt.show()
+
+    return vis_paths
