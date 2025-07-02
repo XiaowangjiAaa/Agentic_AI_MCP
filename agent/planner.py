@@ -54,7 +54,7 @@ def generate_plan(user_input: str, memory: Dict = None) -> List[Dict]:
 
         for path in mask_paths:
             step = {
-                "tool": "quantify_crack_geometry",
+                "tool": "quantify_crack_metrics",
                 "args": {
                     "mask_path": path,
                     "pixel_size_mm": pixel_size,

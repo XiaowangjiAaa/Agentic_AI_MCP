@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import cv2
 from utils.visualize_image_tools import visualize_result
 from agent.memory import MemoryController
-from task_tools.quantify import quantify_crack_geometry
+from task_tools.quantify import generate_crack_visuals
 
 
 def visualize_crack_result(
@@ -59,11 +59,10 @@ def visualize_crack_result(
         pixel_size = memory.get_pixel_size(subject_name) or 0.5  # fallback 默认像素尺寸
 
         if mask_path_str and os.path.exists(mask_path_str):
-            print(f"[fallback] 自动调用 quantify_crack_geometry 生成视觉图: {fallback_visuals}")
-            result = quantify_crack_geometry(
+            print(f"[fallback] 自动调用 generate_crack_visuals 生成视觉图: {fallback_visuals}")
+            result = generate_crack_visuals(
                 mask_path=mask_path_str,
                 pixel_size_mm=pixel_size,
-                metrics=[],  # 不生成指标
                 visuals=fallback_visuals
             )
             if result.get("status") == "success":

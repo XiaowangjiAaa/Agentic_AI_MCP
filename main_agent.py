@@ -152,7 +152,7 @@ if __name__ == "__main__":
                         metric_values = memory.get_metrics_by_name(name, pixel_size)
                         outputs = {k: v for k, v in metric_values.items() if any(map(lambda m: m.lower() in k.lower(), metrics))}
                         results.append({
-                            "tool": "quantify_crack_geometry",
+                            "tool": "quantify_crack_metrics",
                             "status": "success",
                             "summary": f"读取自 memory，包含 {len(outputs)} 项指标",
                             "outputs": outputs,
@@ -176,7 +176,7 @@ if __name__ == "__main__":
                         args["visuals"] = step["visual_types"]
 
                     tool_plan.append({
-                        "tool": "quantify_crack_geometry",
+                        "tool": "quantify_crack_metrics",
                         "args": args,
                         "subject": name
                     })
@@ -189,7 +189,7 @@ if __name__ == "__main__":
                         "visuals": visual_types
                     }
                     tool_plan.append({
-                        "tool": "quantify_crack_geometry",
+                        "tool": "generate_crack_visuals",
                         "args": args,
                         "subject": name
                     })
@@ -217,7 +217,7 @@ if __name__ == "__main__":
 
             # ✅ 新增：保存 generate 可视化图到 memory
             for r in exec_results:
-                if r['tool'] == "quantify_crack_geometry" and r['status'] == "success":
+                if r['tool'] == "generate_crack_visuals" and r['status'] == "success":
                     subject = r["subject"]
                     visual_paths = r.get("visualizations", {})
                     if visual_paths:
@@ -225,7 +225,7 @@ if __name__ == "__main__":
 
         for r in results:
             print(f"[{r['tool']}] → {r['status']}")
-            if r['tool'] == "quantify_crack_geometry" and r['status'] == "success":
+            if r['tool'] == "quantify_crack_metrics" and r['status'] == "success":
                 print("📊 请求指标:")
                 for k, v in r.get("outputs", {}).items():
                     print(f"  {k}: {v}")

@@ -70,7 +70,7 @@ class MemoryController:
                     }
                 }
             
-            elif tool == "quantify_crack_geometry":
+            elif tool in {"quantify_crack_geometry", "quantify_crack_metrics"}:
                 pixel_size = args.get("pixel_size_mm", 0.5)
                 outputs = r.get("outputs", {})
                 visuals = r.get("visualizations", {})
@@ -110,6 +110,21 @@ class MemoryController:
                     }
                 else:
                     continue  # 没有任何 observation，跳过
+
+            elif tool == "generate_crack_visuals":
+                pixel_size = args.get("pixel_size_mm", 0.5)
+                visuals = r.get("visualizations", {})
+                if not visuals:
+                    continue
+                record = {
+                    "subject": subject,
+                    "context": {
+                        "task": "generate",
+                        "pixel_size_mm": pixel_size,
+                        "timestamp": datetime.utcnow().isoformat()
+                    },
+                    "observation": visuals
+                }
 
             already_exists = any(
                 r["subject"] == record["subject"] and

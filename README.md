@@ -6,7 +6,7 @@ The code base has been reorganized to make each component easier to manage.
 ## Folder overview
 
 - `agent` – memory, planner and other agent utilities
-- `task_tools` – executable tools such as segmentation, quantification and summary advice
+- `task_tools` – tools split into clear tasks: segmentation, metric quantification and visual generation
 - `crack_metrics` – low level crack measurement functions
 - `models` – neural network models (e.g. UNet)
 - `utils` – helper utilities for paths, I/O and visualization

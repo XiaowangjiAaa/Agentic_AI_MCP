@@ -26,7 +26,7 @@ def execute_plan(plan: List[Dict[str, Any]], memory=None) -> List[Dict[str, Any]
         tool_fn = tool_registry.get(tool_name)
 
         # ✅ Patch: 移除空的 visuals 参数（兜底）
-        if tool_name == "quantify_crack_geometry":
+        if tool_name in {"generate_crack_visuals", "quantify_crack_geometry"}:
             visuals = args.get("visuals", None)
             if visuals is not None and len(visuals) == 0:
                 del args["visuals"]
@@ -56,14 +56,20 @@ def execute_plan(plan: List[Dict[str, Any]], memory=None) -> List[Dict[str, Any]
                     object_store.update(object_id, "segmentation_path", mask_path)
                     object_store.add_status(object_id, "segmented")
 
-            elif tool_name == "quantify_crack_geometry" and result.get("status") == "success":
+            elif tool_name in {"quantify_crack_metrics", "quantify_crack_geometry"} and result.get("status") == "success":
+                mask_path = args.get("mask_path", "")
+                object_id = object_store.find_id_by_mask_path(mask_path)
+                if object_id:
+                    object_store.add_status(object_id, "quantified")
+
+            elif tool_name == "generate_crack_visuals" and result.get("status") == "success":
                 mask_path = args.get("mask_path", "")
                 object_id = object_store.find_id_by_mask_path(mask_path)
                 vis_path = result.get("visualizations", {}).get("max_width_overlay")
                 if object_id:
                     if vis_path:
                         object_store.update(object_id, "visualization_path", vis_path)
-                    object_store.add_status(object_id, "quantified")
+                    object_store.add_status(object_id, "generated")
 
             results.append({
                 "tool": tool_name,
